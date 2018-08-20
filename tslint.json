@@ -1,0 +1,36 @@
+{
+  "extends": ["tslint:latest"],
+  "rules": {
+      "object-literal-sort-keys":false,
+      "no-implicit-dependencies":false,
+      "no-var-requires":false,
+      "quotemark": [
+        true,
+        "single",
+        "avoid-escape"
+      ],
+      "semicolon": [
+        true,
+        "never"
+      ],
+      "no-var-keyword":true,
+      "trailing-comma": [
+        true, {
+          "multiline": "never",
+          "singleline": "never"
+        }
+      ],
+      "no-submodule-imports":false,
+      "no-console":true,
+      "max-classes-per-file":false,
+      "no-empty":true,
+      "no-shadowed-variable":true,
+      "one-variable-per-declaration":false
+  },
+  "linterOptions": {
+    "exclude": [
+      "/node_modules",
+      "/build"
+    ]
+  }
+}
