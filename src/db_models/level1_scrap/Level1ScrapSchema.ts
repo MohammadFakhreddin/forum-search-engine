@@ -54,6 +54,16 @@ Level1ScrapSchema.statics.create = function(
   })
 }
 
+Level1ScrapSchema.statics.findOneAndUpdateAsync = function(
+  query: any,
+  updateFieldsAndValues: any,
+  options?: any
+): Promise<Types.IErrResPromise> {
+  return new Promise((resolve) => {
+    this.findByIdAndUpdate(query, updateFieldsAndValues, options, (err, res) => resolve({err, res}))
+  })
+}
+
 export const Level1ScrapDb: ILevel1ScrapSchema = Mongoose.model('level1', Level1ScrapSchema)
 
 export interface ILevel1ScrapSchema extends Mongoose.Model<Mongoose.Document> {
@@ -64,6 +74,14 @@ export interface ILevel1ScrapSchema extends Mongoose.Model<Mongoose.Document> {
   findByIdAndUpdateAsync?: (
     objectId: string,
     updateFieldsAndValues: any
+  ) => Promise<{
+    err: any,
+    res: ILevel1Scrap
+  }>,
+  findOneAndUpdateAsync?: (
+    query: any,
+    updateFieldsAndValues: any,
+    options?: any
   ) => Promise<{
     err: any,
     res: ILevel1Scrap

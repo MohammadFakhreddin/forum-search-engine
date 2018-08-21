@@ -1,14 +1,45 @@
-import { ProcessVariables } from './Config'
+import CrawlHandler from 'crawler'
+import { ProcessVariables, RootUrls } from './Config'
 import { Level0ScrapDb } from './db_models/level0_scrap/Level0ScrapSchema'
+import { RootUrlsDb } from './db_models/root_urls/RootUrls'
+import { Logger } from './utils/Logger'
+import { CommonValidator } from './utils/RegexValidator'
 
 export class Drone {
   private isBusy = false
   private droneWatchDog: NodeJS.Timer = null
+  private crawlHandler = null
   public constructor() {
-    this.droneWatchDog = setInterval(
-      this.searchForUrls,
-      ProcessVariables.droneInterval
-    )
+    this.crawlHandler = new CrawlHandler({
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json; charset=utf-8'
+      },
+      jQuery: true,
+      jar: true,
+      timeout: 4000,
+      callback: this.onCrawlResIsReady
+    })
+    RootUrlsDb.findAsync({}).then(async ({err, res}) => {
+      if (err) {
+        Logger.error('Drone:Cannot start drone\n' + JSON.stringify(err), __filename)
+        return
+      }
+      if (CommonValidator.isEmptyArray(res)) {
+        Logger.log('Drone:First time initiating,Saving root urls to db')
+        for (const rootUrl of RootUrls) {
+          const createRootUrlResult = await RootUrlsDb.createNewRootUrl(rootUrl)
+          if (createRootUrlResult.err) {
+            Logger.error('Error creating url ' + rootUrl +
+              ' maybe restart is required\n' + JSON.stringify(err))
+          }
+        }
+      }
+      this.droneWatchDog = setInterval(
+        this.searchForUrls,
+        ProcessVariables.droneInterval
+      )
+    })
   }
   public stop = () => {
     if (this.droneWatchDog != null) {
@@ -17,6 +48,99 @@ export class Drone {
     }
   }
   private async searchForUrls() {
-
+    if (this.isBusy) {
+      Logger.error('Last drone is still busy aborting interval', __filename)
+      return
+    }
+    this.isBusy = true
+    const searchProcess = async () => {
+      Logger.log('Drone:Starting from unchecked root urls', __filename)
+      {// Checking if root url needs scrapping
+        const findUnCheckedSchemasResult = await RootUrlsDb.findUnCheckedSchemas()
+        if (findUnCheckedSchemasResult.err) {
+          Logger.error('Drone:Error in finding unchecked root urls\n'
+            + JSON.stringify(findUnCheckedSchemasResult), __filename)
+          return
+        }
+        if (CommonValidator.isEmptyArray(findUnCheckedSchemasResult.res) === false) {
+          for (const rootUrl of findUnCheckedSchemasResult.res) {
+            await this.crawlForUrls(rootUrl.url, rootUrl._id, rootUrl.url)
+            const updateRootUrlResult = await RootUrlsDb.findByIdAndUpdateAsync(rootUrl._id, {
+              lastChecked: new Date()
+            })
+            if (updateRootUrlResult.err != null) {
+              Logger.error('Drone:update root url error,\n' + JSON.stringify(updateRootUrlResult.err), __filename)
+            }
+          }
+        }
+      }
+      {// Checking if level0Schema needs scrapping
+        const findUnCheckedSchemasResult = await Level0ScrapDb.findUnCheckedForUrlSchemas()
+        if (findUnCheckedSchemasResult.err) {
+          Logger.error('Drone:Error in finding unchecked level0 schema\n'
+            + JSON.stringify(findUnCheckedSchemasResult.err), __filename)
+          return
+        }
+        if (CommonValidator.isEmptyArray(findUnCheckedSchemasResult.res) === false) {
+          for (const level0Scrap of findUnCheckedSchemasResult.res) {
+            await this.crawlForUrls(level0Scrap.url, level0Scrap._id, level0Scrap.rootUrl)
+            const updateLevel0ScrapResult = await Level0ScrapDb.findByIdAndUpdateAsync(level0Scrap._id, {
+              checkedForUrl: true
+            })
+            if (updateLevel0ScrapResult.err) {
+              Logger.error('Drone:update level0Scrap\n' + JSON.stringify(updateLevel0ScrapResult.err), __filename)
+            }
+          }
+        }
+      }
+    }
+    await searchProcess()
+    this.isBusy = false
+  }
+  private crawlForUrls(url: string, objectId: string, rootUrl: string) {
+    return new Promise((resolve) => {
+      this.crawlHandler.on('drain', resolve)
+      this.crawlHandler.queue({
+        uri: url,
+        rootUrl
+      })
+    })
+  }
+  private onCrawlResIsReady = async (error, res, done) => {
+    if (error) {
+      Logger.error('Drone:Crawl failed for url ' + res.options.uri + '\n' + JSON.stringify(error))
+      return
+    }
+    const rootUrl: string = res.options.rootUrl
+    const uri: string = res.options.uri
+    const aElements = res.$('a')
+    if (CommonValidator.isNullOrEmpty(aElements) === false) {
+      for (const aElement of aElements) {
+        const hrefLink = aElement.attr('href')
+        if (CommonValidator.isNullOrEmpty(hrefLink) === false) {
+          let normalizedUrl = ''
+          if (uri.startsWith(rootUrl)) {
+            normalizedUrl = uri
+          } else {
+            if (uri.startsWith('http') || uri.startsWith('https')) {
+              continue// Means it's link to another website
+            }
+            normalizedUrl = rootUrl.concat(uri)
+          }
+          const addNewLinkResult = await Level0ScrapDb.findOneAndUpdateAsync({
+            url: normalizedUrl
+          }, {
+            checkedForUrl: false
+          }, {
+            upsert: true
+          })
+          if (addNewLinkResult.err) {
+            Logger.error('Drone:Adding new link error\n' + JSON.stringify(addNewLinkResult))
+            continue
+          }
+        }
+      }
+    }
+    done()
   }
 }

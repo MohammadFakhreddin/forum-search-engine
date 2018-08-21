@@ -23,7 +23,8 @@ export const NetworkVariables = {
 export const ProcessVariables = {
   tokenizerInterval: 60 * 4 * 1000, // Every 4 hour
   droneInterval: 60 * 6 * 1000, // Every 6 hour
-  crawlerInterval: 60 * 5 * 1000// Every 5 hour
+  crawlerInterval: 60 * 5 * 1000, // Every 5 hour,
+  rootUrlsReCrawlTime: 60 * 24 * 2 * 1000 // Every 2 day
 }
 
 export const SecurityVariables = {
@@ -38,3 +39,8 @@ export const SecurityVariables = {
 export const LocalEvents = {
   roleIsReady : 'role-ready'
 }
+
+export const RootUrls = [
+  'https://www.ninisite.com/',
+  'http://porsak.ir/'
+]
