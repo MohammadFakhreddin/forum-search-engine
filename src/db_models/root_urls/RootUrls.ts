@@ -1,12 +1,12 @@
 import Mongoose from 'mongoose'
 import { ProcessVariables } from '../../Config'
-import { ILevel0Scrap } from '../../models/ILevel0Scrap'
 import { IRootUrls } from '../../models/IRootUrls'
 import * as Types from './../../utils/Types'
 
 const RootUrlsSchema = new Mongoose.Schema({
   url: {type: String, required: true},
-  lastChecked: {type: Date, default: new Date()}
+  lastChecked: {type: Date, default: new Date()},
+  isFirstTimeCheck: {type: Boolean, default: true}
 })
 
 RootUrlsSchema.set('autoIndex', false)
@@ -21,7 +21,8 @@ RootUrlsSchema.statics.createNewRootUrl = function(
   return new Promise((resolve) => {
     this.create({
       url,
-      lastChecked: null
+      lastChecked: new Date(),
+      isFirstTimeCheck: true
     }, (err, res) => resolve({err, res}))
   })
 }
@@ -29,12 +30,10 @@ RootUrlsSchema.statics.createNewRootUrl = function(
 RootUrlsSchema.statics.findUnCheckedSchemas = function(): Promise<Types.IErrResPromise> {
   return new Promise((resolve) => {
     this.find({
-      lastChecked: {
-        $or: [
-          {$lt: new Date(Date.now() - ProcessVariables.rootUrlsReCrawlTime)},
-          {$eq: null}
-        ]
-      }
+      $or: [
+        {lastChecked: {$lt: new Date(Date.now() - ProcessVariables.rootUrlsReCrawlTime)}},
+        {isFirstTimeCheck: {$eq: true}}
+      ]
     }, (err, res) => resolve({err, res}))
   })
 }
@@ -44,7 +43,7 @@ RootUrlsSchema.statics.findByIdAndUpdateAsync = function(
   updateFieldsAndValues: any
 ): Promise<Types.IErrResPromise> {
   return new Promise((resolve) => {
-    this.findById(
+    this.findByIdAndUpdate(
       objectId,
       updateFieldsAndValues,
       (err, res) => resolve({err, res})

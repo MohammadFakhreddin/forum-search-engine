@@ -39,7 +39,7 @@ Level1ScrapSchema.statics.findByIdAndUpdateAsync = function(
   })
 }
 
-Level1ScrapSchema.statics.create = function(
+Level1ScrapSchema.statics.createNewLevel1ScrapSchema = function(
   title: string,
   body: string,
   url: string
@@ -60,7 +60,7 @@ Level1ScrapSchema.statics.findOneAndUpdateAsync = function(
   options?: any
 ): Promise<Types.IErrResPromise> {
   return new Promise((resolve) => {
-    this.findByIdAndUpdate(query, updateFieldsAndValues, options, (err, res) => resolve({err, res}))
+    this.findOneAndUpdate(query, updateFieldsAndValues, options, (err, res) => resolve({err, res}))
   })
 }
 
@@ -85,5 +85,10 @@ export interface ILevel1ScrapSchema extends Mongoose.Model<Mongoose.Document> {
   ) => Promise<{
     err: any,
     res: ILevel1Scrap
-  }>
+  }>,
+  createNewLevel1ScrapSchema?: (
+    title: string,
+    body: string,
+    url: string
+  ) => Promise<Types.IErrResPromise>
 }

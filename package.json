@@ -16,7 +16,7 @@
     "debug": "npm run build && npm run watch-debug",
     "serve-debug": "nodemon --inspect build/bin/www.js",
     "watch-debug": "concurrently -k -p \"[{name}]\" -n \"TypeScript,Node\" \"npm run watch-ts\" \"npm run serve-debug\"",
-    "mongod": "mongod --dbpath local_db_storage --port 27018",
+    "mongod": "sudo mongod --dbpath local_db_storage --port 27018",
     "mongo": "mongo mongodb://127.0.0.1:27018/test?connectTimeoutMS=10000"
   },
   "dependencies": {

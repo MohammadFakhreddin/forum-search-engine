@@ -45,11 +45,18 @@ Level2ScrapSchema.statics.createNewLevel2Schema = function(
   return new Promise((resolve) => {
     const titleBio = StringHelper.getBio(title)
     const bodyBio = StringHelper.getBio(body)
+    const tokenAndOrder = []
+    for (let i = 0; i < tokens.length; i++) {
+      tokenAndOrder.push({
+        token: tokens[i],
+        order: i
+      })
+    }
     this.create({
       url,
-      tokens,
-      title: titleBio,
-      body: bodyBio
+      tokenAndOrder,
+      previewTitle: titleBio,
+      previewBody: bodyBio
     }, (err, res) => resolve({err, res}))
   })
 }

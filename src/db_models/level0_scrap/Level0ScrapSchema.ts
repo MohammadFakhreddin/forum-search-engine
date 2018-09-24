@@ -23,7 +23,8 @@ Level0ScrapSchema.statics.createNewLevel0Scrap = function(
     this.create({
       url,
       checkedForUrl: false,
-      checkedForLevel1: false
+      checkedForLevel1: false,
+      rootUrl
     }, (err, res) => resolve({err, res}))
   })
 }
@@ -50,7 +51,7 @@ Level0ScrapSchema.statics.findByIdAndUpdateAsync = function(
   options: any = null
 ): Promise<Types.IErrResPromise> {
   return new Promise((resolve) => {
-    this.findById(
+    this.findByIdAndUpdate(
       objectId,
       updateFieldsAndValues,
       options,
@@ -73,7 +74,15 @@ Level0ScrapSchema.statics.findOneAndUpdateAsync = function(
   options?: any
 ): Promise<Types.IErrResPromise> {
   return new Promise((resolve) => {
-    this.findByIdAndUpdate(query, updateFieldsAndValues, options, (err, res) => resolve({err, res}))
+    this.findOneAndUpdate(query, updateFieldsAndValues, options, (err, res) => resolve({err, res}))
+  })
+}
+
+Level0ScrapSchema.statics.findOneAsync = function(
+  query: any
+): Promise<Types.IErrResPromise> {
+  return new Promise((resolve) => {
+    this.findOne(query, (err, res) => resolve({err, res}))
   })
 }
 
@@ -110,6 +119,12 @@ export interface ILevel0ScrapSchema extends Mongoose.Model<Mongoose.Document> {
     query: any,
     updateFieldsAndValues: any,
     options?: any
+  ): Promise<{
+    err: any,
+    res: ILevel0Scrap
+  }>,
+  findOneAsync?(
+    query: any
   ): Promise<{
     err: any,
     res: ILevel0Scrap

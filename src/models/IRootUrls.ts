@@ -1,5 +1,6 @@
 export interface IRootUrls {
   _id: string,
   url: string,
-  lastChecked: Date
+  lastChecked: Date,
+  isFirstTimeCheck: boolean
 }

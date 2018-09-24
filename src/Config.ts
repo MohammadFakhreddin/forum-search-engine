@@ -3,6 +3,9 @@ import Path from 'path'
 
 const dbName = 'iran_forums'
 
+const oneHour = 60 * 60 * 1000
+const oneDay = oneHour * 24
+
 export const EnvironmentVariables  = {
   port:  '8082',
   isDev:  true,
@@ -13,7 +16,8 @@ export const EnvironmentVariables  = {
   isWindows: /^win/.test(Os.platform()),
   devMongoUrl: `mongodb://127.0.0.1:27018/${dbName}?connectTimeoutMS=10000`,
   prodMongoUrl: `mongodb://127.0.0.1:27018/${dbName}?connectTimeoutMS=10000`,
-  pythonScriptAddress: Path.join(__dirname, './python/Normalizer.py')
+  pythonScriptAddress: Path.join(__dirname, '../python'),
+  pythonScriptName: 'MTokenizer.py'
 }
 
 export const NetworkVariables = {
@@ -21,10 +25,10 @@ export const NetworkVariables = {
 }
 
 export const ProcessVariables = {
-  tokenizerInterval: 60 * 4 * 1000, // Every 4 hour
-  droneInterval: 60 * 6 * 1000, // Every 6 hour
-  crawlerInterval: 60 * 5 * 1000, // Every 5 hour,
-  rootUrlsReCrawlTime: 60 * 24 * 2 * 1000 // Every 2 day
+  tokenizerInterval: oneHour * 4, // Every 4 hour
+  droneInterval: oneHour * 6, // Every 6 hour
+  crawlerInterval: oneHour * 5, // Every 5 hour,
+  rootUrlsReCrawlTime: oneDay * 2 // Every 2 day
 }
 
 export const SecurityVariables = {

@@ -9,6 +9,7 @@ export class Drone {
   private isBusy = false
   private droneWatchDog: NodeJS.Timer = null
   private crawlHandler = null
+  private onCrawlCompleteCallback: () => void = null
   public constructor() {
     this.crawlHandler = new CrawlHandler({
       headers: {
@@ -20,6 +21,7 @@ export class Drone {
       timeout: 4000,
       callback: this.onCrawlResIsReady
     })
+    this.crawlHandler.on('drain', this.onDrainEvent)
     RootUrlsDb.findAsync({}).then(async ({err, res}) => {
       if (err) {
         Logger.error('Drone:Cannot start drone\n' + JSON.stringify(err), __filename)
@@ -35,10 +37,11 @@ export class Drone {
           }
         }
       }
-      this.droneWatchDog = setInterval(
-        this.searchForUrls,
-        ProcessVariables.droneInterval
-      )
+      // this.droneWatchDog = setInterval(
+      //   this.searchForUrls,
+      //   ProcessVariables.droneInterval
+      // )
+      // this.searchForUrls()
     })
   }
   public stop = () => {
@@ -64,14 +67,17 @@ export class Drone {
         }
         if (CommonValidator.isEmptyArray(findUnCheckedSchemasResult.res) === false) {
           for (const rootUrl of findUnCheckedSchemasResult.res) {
-            await this.crawlForUrls(rootUrl.url, rootUrl._id, rootUrl.url)
+            await this.crawlForUrls(rootUrl.url, rootUrl.url)
             const updateRootUrlResult = await RootUrlsDb.findByIdAndUpdateAsync(rootUrl._id, {
-              lastChecked: new Date()
+              lastChecked: new Date(),
+              isFirstTimeCheck: false
             })
             if (updateRootUrlResult.err != null) {
               Logger.error('Drone:update root url error,\n' + JSON.stringify(updateRootUrlResult.err), __filename)
             }
           }
+        } else {
+          Logger.log('Drone:Root urls are already checked')
         }
       }
       {// Checking if level0Schema needs scrapping
@@ -83,7 +89,7 @@ export class Drone {
         }
         if (CommonValidator.isEmptyArray(findUnCheckedSchemasResult.res) === false) {
           for (const level0Scrap of findUnCheckedSchemasResult.res) {
-            await this.crawlForUrls(level0Scrap.url, level0Scrap._id, level0Scrap.rootUrl)
+            await this.crawlForUrls(level0Scrap.url, level0Scrap.rootUrl)
             const updateLevel0ScrapResult = await Level0ScrapDb.findByIdAndUpdateAsync(level0Scrap._id, {
               checkedForUrl: true
             })
@@ -97,46 +103,58 @@ export class Drone {
     await searchProcess()
     this.isBusy = false
   }
-  private crawlForUrls(url: string, objectId: string, rootUrl: string) {
+  private crawlForUrls(url: string, rootUrl: string) {
     return new Promise((resolve) => {
-      this.crawlHandler.on('drain', resolve)
+      this.onCrawlCompleteCallback = resolve
       this.crawlHandler.queue({
         uri: url,
         rootUrl
       })
     })
   }
+  private onDrainEvent = (): void => {
+    if (typeof this.onCrawlCompleteCallback === 'function') {
+      this.onCrawlCompleteCallback()
+    }
+  }
   private onCrawlResIsReady = async (error, res, done) => {
     if (error) {
       Logger.error('Drone:Crawl failed for url ' + res.options.uri + '\n' + JSON.stringify(error))
+      done()
       return
     }
     const rootUrl: string = res.options.rootUrl
-    const uri: string = res.options.uri
     const aElements = res.$('a')
-    if (CommonValidator.isNullOrEmpty(aElements) === false) {
-      for (const aElement of aElements) {
-        const hrefLink = aElement.attr('href')
+    if (aElements != null && aElements.length !== 0) {
+      // tslint:disable-next-line:prefer-for-of
+      for (let i = 0; i < aElements.length; i++) {
+        let hrefLink = aElements[i].attribs.href
         if (CommonValidator.isNullOrEmpty(hrefLink) === false) {
+          hrefLink = hrefLink.trim()
           let normalizedUrl = ''
-          if (uri.startsWith(rootUrl)) {
-            normalizedUrl = uri
-          } else {
-            if (uri.startsWith('http') || uri.startsWith('https')) {
-              continue// Means it's link to another website
-            }
-            normalizedUrl = rootUrl.concat(uri)
-          }
-          const addNewLinkResult = await Level0ScrapDb.findOneAndUpdateAsync({
-            url: normalizedUrl
-          }, {
-            checkedForUrl: false
-          }, {
-            upsert: true
-          })
-          if (addNewLinkResult.err) {
-            Logger.error('Drone:Adding new link error\n' + JSON.stringify(addNewLinkResult))
+          if (hrefLink.startsWith(rootUrl) && rootUrl !== hrefLink) {
+            normalizedUrl = hrefLink
+          // Means it's a redirect to another website
+          } else if (hrefLink.startsWith('http') || hrefLink.startsWith('https')) {
             continue
+          } else {
+            normalizedUrl = rootUrl.concat(hrefLink)
+          }
+          const findUrlResult = await Level0ScrapDb.findOneAsync({
+            url: normalizedUrl
+          })
+          if (findUrlResult.err) {
+            Logger.error('Drone:Finding similar url failed for url '
+              + normalizedUrl + '\n' + JSON.stringify(findUrlResult.err)
+            )
+          } else if (findUrlResult.res == null)  {
+            const createNewLinkResult = await Level0ScrapDb.createNewLevel0Scrap(
+              normalizedUrl,
+              rootUrl
+            )
+            if (createNewLinkResult.err) {
+              Logger.error('Drone:Adding new link error\n' + JSON.stringify(createNewLinkResult.err))
+            }
           }
         }
       }

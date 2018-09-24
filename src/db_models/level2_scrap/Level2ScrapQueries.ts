@@ -21,9 +21,10 @@ export class Level2ScrapQueries {
         }
         const options = {
           args: text,
-          mode: 'json'
+          mode: 'json',
+          scriptPath: EnvironmentVariables.pythonScriptAddress
         }
-        PythonShell.run(EnvironmentVariables.pythonScriptAddress, options, async (pythonErr, pythonRes) => {
+        PythonShell.run(EnvironmentVariables.pythonScriptName, options, async (pythonErr, pythonRes) => {
           if (pythonErr) {
             reject(pythonErr)
             return

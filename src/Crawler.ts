@@ -9,6 +9,7 @@ export class Crawler {
   private isBusy = false
   private crawlerWatchDog: NodeJS.Timer = null
   private crawlHandler = null
+  private onCrawlCompleteCallback: () => void = null
   public constructor() {
     this.crawlHandler = new CrawlHandler({
       headers: {
@@ -20,10 +21,12 @@ export class Crawler {
       timeout: 4000,
       callback: this.onCrawlResIsReady
     })
-    this.crawlerWatchDog = setInterval(
-      this.crawlNewlyAddedUrls,
-      ProcessVariables.crawlerInterval
-    )
+    this.crawlHandler.on('drain', this.onDrainEvent)
+    // this.crawlerWatchDog = setInterval(
+    //   this.crawlNewlyAddedUrls,
+    //   ProcessVariables.crawlerInterval
+    // )
+    // this.crawlNewlyAddedUrls()
   }
   public stop = () => {
     if (this.crawlerWatchDog != null) {
@@ -61,28 +64,31 @@ export class Crawler {
   }
   private crawlForUrls(url: string) {
     return new Promise((resolve) => {
-      this.crawlHandler.on('drain', resolve)
+      this.onCrawlCompleteCallback = resolve
       this.crawlHandler.queue({
         uri: url
       })
     })
   }
+  private onDrainEvent = (): void => {
+    if (typeof this.onCrawlCompleteCallback === 'function') {
+      this.onCrawlCompleteCallback()
+    }
+  }
   private onCrawlResIsReady = async (error, res, done) => {
     if (error) {
       Logger.error('Crawler:Crawl failed for url ' + res.options.uri + '\n' + JSON.stringify(error))
+      done()
       return
     }
     const url: string = res.options.uri
     const pageTexts = res.$('body').text()
-    const findOneAndUpdateAsyncResult = await Level1ScrapDb.findOneAndUpdateAsync({
+    // TODO Have to do something about title
+    const findOneAndUpdateAsyncResult = await Level1ScrapDb.createNewLevel1ScrapSchema(
+      'no_title_supported_yet',
+      pageTexts,
       url
-    }, {
-      checked: false,
-      body: pageTexts,
-      title: ''
-    }, {
-      upsert: true
-    })
+    )
     if (findOneAndUpdateAsyncResult.err) {
       Logger.error('Crawler:Adding new level1SchemaFailed\n' + JSON.stringify(findOneAndUpdateAsyncResult.err))
     }
