@@ -37,11 +37,11 @@ export class Drone {
           }
         }
       }
-      // this.droneWatchDog = setInterval(
-      //   this.searchForUrls,
-      //   ProcessVariables.droneInterval
-      // )
-      // this.searchForUrls()
+      this.droneWatchDog = setInterval(
+        this.searchForUrls,
+        ProcessVariables.droneInterval
+      )
+      this.searchForUrls()
     })
   }
   public stop = () => {
@@ -89,7 +89,11 @@ export class Drone {
         }
         if (CommonValidator.isEmptyArray(findUnCheckedSchemasResult.res) === false) {
           for (const level0Scrap of findUnCheckedSchemasResult.res) {
-            await this.crawlForUrls(level0Scrap.url, level0Scrap.rootUrl)
+            try {// Some links may not be html
+              await this.crawlForUrls(level0Scrap.url, level0Scrap.rootUrl)
+            } catch (exception) {
+              Logger.handleError(exception)
+            }
             const updateLevel0ScrapResult = await Level0ScrapDb.findByIdAndUpdateAsync(level0Scrap._id, {
               checkedForUrl: true
             })
@@ -101,6 +105,7 @@ export class Drone {
       }
     }
     await searchProcess()
+    Logger.log('Drone:Search process complete,Waiting for start of another interval')
     this.isBusy = false
   }
   private crawlForUrls(url: string, rootUrl: string) {

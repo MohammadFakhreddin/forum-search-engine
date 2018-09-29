@@ -14,6 +14,7 @@ export const EnvironmentVariables  = {
   exceptionAddress: Path.join(__dirname, '../log/exceptions.log'),
   logAddress: Path.join(__dirname, '../log/logs.log'),
   isWindows: /^win/.test(Os.platform()),
+  isMac: /^darwin/.test(Os.platform()),
   devMongoUrl: `mongodb://127.0.0.1:27018/${dbName}?connectTimeoutMS=10000`,
   prodMongoUrl: `mongodb://127.0.0.1:27018/${dbName}?connectTimeoutMS=10000`,
   pythonScriptAddress: Path.join(__dirname, '../python'),
@@ -48,3 +49,10 @@ export const RootUrls = [
   'https://www.ninisite.com/',
   'http://porsak.ir/'
 ]
+
+export const PythonExecuterAddress = (
+  EnvironmentVariables.isMac === true
+  // tslint:disable-next-line:max-line-length
+  ? '/usr/local/Cellar/python/3.6.5_1/Frameworks/Python.framework/Versions/3.6/Resources/Python.app/Contents/MacOS/Python'
+  : null
+)

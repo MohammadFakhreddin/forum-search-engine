@@ -6,24 +6,27 @@ import {
 } from 'graphql'
 
 const tokenAndOrderTypeQL = new GraphQLObjectType({
-  name: 'tokenAndOrder',
+  name: 'tokenAndOrderTypeQL',
   fields: {
     token: {type: GraphQLString},
     order: {type: GraphQLInt}
   }
 })
 
-const Level2ScrapSearchRes = new GraphQLObjectType({
-  name: 'level2ScrapSearchRes',
+const Level2ScrapScrapTypeQL = new GraphQLObjectType({
+  name: 'Level2ScrapScrapTypeQL',
   fields: {
-    tokenAndOrder: {type: new GraphQLList(tokenAndOrderTypeQL)}
+    tokenAndOrder: {type: new GraphQLList(tokenAndOrderTypeQL)},
+    url: {type: GraphQLString},
+    previewTitle: {type: GraphQLString},
+    previewBody: {type: GraphQLString}
   }
 })
 
 export const Level2ScrapSearchOutputType = new GraphQLObjectType({
-  name: 'level2ScrapTypeQl',
+  name: 'Level2ScrapSearchOutputType',
   fields: {
-    res: {type: Level2ScrapSearchRes},
+    res: {type: new GraphQLList(Level2ScrapScrapTypeQL)},
     statusCode: {type: GraphQLString}
   }
 })

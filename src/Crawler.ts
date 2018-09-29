@@ -22,11 +22,11 @@ export class Crawler {
       callback: this.onCrawlResIsReady
     })
     this.crawlHandler.on('drain', this.onDrainEvent)
-    // this.crawlerWatchDog = setInterval(
-    //   this.crawlNewlyAddedUrls,
-    //   ProcessVariables.crawlerInterval
-    // )
-    // this.crawlNewlyAddedUrls()
+    this.crawlerWatchDog = setInterval(
+      this.crawlNewlyAddedUrls,
+      ProcessVariables.crawlerInterval
+    )
+    this.crawlNewlyAddedUrls()
   }
   public stop = () => {
     if (this.crawlerWatchDog != null) {
@@ -47,19 +47,22 @@ export class Crawler {
             + JSON.stringify(findUnCheckedSchemasResult), __filename)
         return
       }
-      if (CommonValidator.isEmptyArray(findUnCheckedSchemasResult.res) === false) {
-        for (const level0Scrap of findUnCheckedSchemasResult.res) {
-          await this.crawlForUrls(level0Scrap.url)
-          const updateLevel0ScrapResult = await Level0ScrapDb.findByIdAndUpdateAsync(level0Scrap._id, {
-            checkedForLevel1: true
-          })
-          if (updateLevel0ScrapResult.err) {
-            Logger.error('Crawler:update level0Scrap\n' + JSON.stringify(updateLevel0ScrapResult.err), __filename)
-          }
+      if (CommonValidator.isEmptyArray(findUnCheckedSchemasResult.res) === true) {
+        Logger.log('Crawler:No unchecked schema found', __filename)
+        return
+      }
+      for (const level0Scrap of findUnCheckedSchemasResult.res) {
+        await this.crawlForUrls(level0Scrap.url)
+        const updateLevel0ScrapResult = await Level0ScrapDb.findByIdAndUpdateAsync(level0Scrap._id, {
+          checkedForLevel1: true
+        })
+        if (updateLevel0ScrapResult.err) {
+          Logger.error('Crawler:update level0Scrap\n' + JSON.stringify(updateLevel0ScrapResult.err), __filename)
         }
       }
     }
     await crawlProcess()
+    Logger.log('Crawler:Crawl of newly added urls finished,Waiting for next interval')
     this.isBusy = false
   }
   private crawlForUrls(url: string) {

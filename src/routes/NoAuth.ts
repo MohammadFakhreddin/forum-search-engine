@@ -5,17 +5,20 @@ import {
   GraphQLSchema
 } from 'graphql'
 import { EnvironmentVariables } from '../Config'
+import { Level2ScrapQueries } from '../db_models/level2_scrap/Level2ScrapQueries'
 import { ErrorHandler } from './ErrorHandler'
 
 const rootQuery = new GraphQLObjectType({
   name: 'Query',
   fields: () => ({
+    search: Level2ScrapQueries.search
   })
 })
 
 const rootMutation = new GraphQLObjectType({
   name: 'Mutation',
   fields: () => ({
+    search: Level2ScrapQueries.search
   })
 })
 

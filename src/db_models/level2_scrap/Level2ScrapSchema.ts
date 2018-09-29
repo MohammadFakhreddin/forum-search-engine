@@ -18,8 +18,8 @@ const Level2ScrapSchema = new Mongoose.Schema({
 Level2ScrapSchema.set('autoIndex', false)
 
 Level2ScrapSchema.index({
-  tokenAndOrder: 1,
-  _id: 1
+  'tokenAndOrder.token': 1,
+  '_id': 1
 })
 
 Level2ScrapSchema.index({

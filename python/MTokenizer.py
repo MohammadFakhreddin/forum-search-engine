@@ -7,6 +7,7 @@ import sys
 from StopWords import stop_words
 import re
 import json
+from wordfreq import zipf_frequency
 
 if len(sys.argv)<2 :
   print('error')
@@ -30,7 +31,10 @@ def add_to_tokens_if_not_exists(parsed_token):
       exists = True
       break
   if exists == False:
-    result_tokens.append(parsed_token)
+    freq = zipf_frequency(parsed_token,'fa')
+    if freq<4:
+      result_tokens.append(parsed_token)
+    
 
 for sentence in sentences:
   tokens = Hazm.word_tokenize(sentence)
@@ -66,7 +70,5 @@ for sentence in sentences:
     add_to_tokens_if_not_exists(token_stem)
 
 #Part four:Choose token based on frequency Or search and give score based on frequency
-# for result_token in result_tokens:
-#   print(result_token)
 print(json.dumps(result_tokens))
 sys.exit()
