@@ -3,6 +3,7 @@ import Path from 'path'
 
 const dbName = 'iran_forums'
 
+const oneMinute = 60 * 1000
 const oneHour = 60 * 60 * 1000
 const oneDay = oneHour * 24
 
@@ -26,10 +27,10 @@ export const NetworkVariables = {
 }
 
 export const ProcessVariables = {
-  tokenizerInterval: oneHour * 4, // Every 4 hour
-  droneInterval: oneHour * 6, // Every 6 hour
-  crawlerInterval: oneHour * 5, // Every 5 hour,
-  rootUrlsReCrawlTime: oneDay * 2 // Every 2 day
+  tokenizerInterval: oneMinute * 1, // oneHour * 2,
+  droneInterval: oneMinute * 2, // oneHour * 4,
+  crawlerInterval: oneMinute * 4, // oneHour * 8,
+  rootUrlsReCrawlTime: oneDay * 2
 }
 
 export const SecurityVariables = {
@@ -38,7 +39,8 @@ export const SecurityVariables = {
   tokenLifeTime: 60 * 60 * 24, // Means one day,,
   tokenHeader: 'messenger-app', // TODO change it,
   otpCodeLifeTime: 60 * 10 * 1000,
-  otpCodeMinimumResendTime: 60 * 5 * 1000
+  otpCodeMinimumResendTime: 60 * 5 * 1000,
+  validOrigin: 'http://localhost:3000'
 }
 
 export const LocalEvents = {

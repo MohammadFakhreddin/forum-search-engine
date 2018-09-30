@@ -24,17 +24,19 @@ normalized_text = normalizer_instance.normalize(raw_text)
 sentences = Hazm.sent_tokenize(normalized_text)
 
 result_tokens = list()
+less_accurate_tokens = list()
 def add_to_tokens_if_not_exists(parsed_token):
   exists = False
   for result_token in result_tokens:
     if parsed_token == result_token:
       exists = True
       break
-  if exists == False:
+  if exists == False:#Part four:Choose token based on frequency Or search and give score based on frequency
     freq = zipf_frequency(parsed_token,'fa')
-    if freq<4:
+    if freq<6:
       result_tokens.append(parsed_token)
-    
+    else:
+      less_accurate_tokens.append(parsed_token)
 
 for sentence in sentences:
   tokens = Hazm.word_tokenize(sentence)
@@ -69,6 +71,9 @@ for sentence in sentences:
     token_stem = stem_finder_instance.stem(token)
     add_to_tokens_if_not_exists(token_stem)
 
-#Part four:Choose token based on frequency Or search and give score based on frequency
-print(json.dumps(result_tokens))
+#Part five:Add more frequency tokens is result is empty
+if(len(result_tokens)!=0):
+  print(json.dumps(result_tokens))
+else:
+  print(json.dumps(less_accurate_tokens))
 sys.exit()

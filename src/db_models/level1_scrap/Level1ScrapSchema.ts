@@ -6,7 +6,9 @@ const Level1ScrapSchema  = new Mongoose.Schema({
   title: {type: String, required: true},
   body: {type: String, default: ''},
   url: {type: String, default: ''},
-  checked: {type: Boolean, default: false}
+  checked: {type: Boolean, default: false},
+  previewTitle: {type: String, default: ''},
+  previewBody: {type: String, default: ''}
 })
 
 Level1ScrapSchema.set('autoIndex', false)
@@ -42,14 +44,18 @@ Level1ScrapSchema.statics.findByIdAndUpdateAsync = function(
 Level1ScrapSchema.statics.createNewLevel1ScrapSchema = function(
   title: string,
   body: string,
-  url: string
+  url: string,
+  previewTitle: string,
+  previewBody: string
 ): Promise<Types.IErrResPromise> {
   return new Promise((resolve) => {
     this.create({
       title,
       body,
       url,
-      checked: false
+      checked: false,
+      previewTitle,
+      previewBody
     }, (err, res) => resolve({err, res}))
   })
 }
@@ -89,6 +95,8 @@ export interface ILevel1ScrapSchema extends Mongoose.Model<Mongoose.Document> {
   createNewLevel1ScrapSchema?: (
     title: string,
     body: string,
-    url: string
+    url: string,
+    previewTitle: string,
+    previewBody: string
   ) => Promise<Types.IErrResPromise>
 }

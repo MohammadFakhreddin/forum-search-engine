@@ -3,5 +3,7 @@ export interface ILevel1Scrap {
   title: string,
   body: string,
   url: string,
-  checked: boolean
+  checked: boolean,
+  previewTitle: string,
+  previewBody: string
 }

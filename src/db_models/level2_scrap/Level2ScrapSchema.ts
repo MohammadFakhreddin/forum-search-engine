@@ -1,6 +1,5 @@
 import Mongoose from 'mongoose'
 import { ILevel2Scrap } from '../../models/ILevel2Scrap'
-import { StringHelper } from '../../utils/StringHelper'
 import * as Types from './../../utils/Types'
 
 const tokenAndOrderSchema = new Mongoose.Schema({
@@ -31,7 +30,7 @@ Level2ScrapSchema.statics.findIScrapsByToken = function(searchTokens: string[]):
   res: ILevel2Scrap[]
 }> {
   return new Promise((resolve) => {
-    const query = {'tokenAndOrder.token': {$or: searchTokens}}
+    const query = {'tokenAndOrder.token': searchTokens}
     this.find(query, (err, res) => resolve({err, res}))
   })
 }
@@ -39,12 +38,10 @@ Level2ScrapSchema.statics.findIScrapsByToken = function(searchTokens: string[]):
 Level2ScrapSchema.statics.createNewLevel2Schema = function(
   url: string,
   tokens: string[],
-  title: string,
-  body: string
+  previewTitle: string,
+  previewBody: string
 ): Promise<Types.IErrResPromise> {
   return new Promise((resolve) => {
-    const titleBio = StringHelper.getBio(title)
-    const bodyBio = StringHelper.getBio(body)
     const tokenAndOrder = []
     for (let i = 0; i < tokens.length; i++) {
       tokenAndOrder.push({
@@ -55,8 +52,8 @@ Level2ScrapSchema.statics.createNewLevel2Schema = function(
     this.create({
       url,
       tokenAndOrder,
-      previewTitle: titleBio,
-      previewBody: bodyBio
+      previewTitle,
+      previewBody
     }, (err, res) => resolve({err, res}))
   })
 }
@@ -84,8 +81,8 @@ export interface ILevel2ScrapSchema extends Mongoose.Model<Mongoose.Document> {
   createNewLevel2Schema?: (
     url: string,
     tokens: string[],
-    title: string,
-    body: string
+    previewTitle: string,
+    previewBody: string
   ) => Promise<{err: any, res: ILevel2Scrap}>,
   findByIdAndUpdateAsync?(
     objectId: string,

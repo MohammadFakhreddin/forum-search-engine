@@ -47,8 +47,8 @@ export class Tokenizer {
             const createLevel2SchemaResult = await Level2ScrapDb.createNewLevel2Schema(
               scrap.url,
               tokenizeResult.res,
-              scrap.title,
-              scrap.body
+              scrap.previewTitle,
+              scrap.previewBody
             )
             if (createLevel2SchemaResult.err) {
               Logger.error(createLevel2SchemaResult.err)

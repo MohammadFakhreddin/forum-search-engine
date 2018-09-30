@@ -25,6 +25,13 @@ export class Level2ScrapQueries {
           reject(tokenizeResult.err)
           return
         }
+        if (CommonValidator.isEmptyArray(tokenizeResult.res)) {// If it has no token it's unnecessary to search
+          resolve({
+            statusCode: StatusCodes.ok,
+            res: []
+          })
+          return
+        }
         const searchResult = await Level2ScrapDb.findIScrapsByToken(tokenizeResult.res)
         if (searchResult.err) {
           Logger.error(searchResult.err)

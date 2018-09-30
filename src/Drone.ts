@@ -11,6 +11,7 @@ export class Drone {
   private crawlHandler = null
   private onCrawlCompleteCallback: () => void = null
   public constructor() {
+    this.searchForUrls = this.searchForUrls.bind(this)
     this.crawlHandler = new CrawlHandler({
       headers: {
         'Content-Type': 'application/json',
@@ -52,7 +53,7 @@ export class Drone {
   }
   private async searchForUrls() {
     if (this.isBusy) {
-      Logger.error('Last drone is still busy aborting interval', __filename)
+      Logger.error('Drone:Last drone is still busy aborting interval', __filename)
       return
     }
     this.isBusy = true
@@ -129,6 +130,10 @@ export class Drone {
       return
     }
     const rootUrl: string = res.options.rootUrl
+    if (typeof res.$ !== 'function') {
+      done()
+      return
+    }
     const aElements = res.$('a')
     if (aElements != null && aElements.length !== 0) {
       // tslint:disable-next-line:prefer-for-of

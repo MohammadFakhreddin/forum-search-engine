@@ -3,11 +3,16 @@ import CookieParser from 'cookie-parser'
 import Express from 'express'
 import Morgan from 'morgan'
 import path from 'path'
-import { EnvironmentVariables } from './Config'
+import { EnvironmentVariables, SecurityVariables } from './Config'
 import { IndexRoute } from './routes/Index'
 import { NoAuthRoute } from './routes/NoAuth'
 
 const app = Express()
+app.use((req, res, next): void => {
+  res.header('Access-Control-Allow-Origin', SecurityVariables.validOrigin)
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept,messenger-app')
+  next()
+})
 app.set('view engine', 'jade')
 app.set('views', path.join(__dirname, 'views'))
 app.use(Morgan(((EnvironmentVariables.isDev) ? 'dev' : null)))

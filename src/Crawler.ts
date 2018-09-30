@@ -34,7 +34,7 @@ export class Crawler {
       this.crawlerWatchDog = null
     }
   }
-  private async crawlNewlyAddedUrls() {
+  public crawlNewlyAddedUrls = async () => {
     if (this.isBusy) {
       Logger.error('Last crawler is still busy aborting interval', __filename)
       return
@@ -85,12 +85,20 @@ export class Crawler {
       return
     }
     const url: string = res.options.uri
+    if (typeof res.$ !== 'function') {
+      done()
+      return
+    }
     const pageTexts = res.$('body').text()
+    const previewTitle = res.$('head > title').text()
+    const previewBody = res.$('meta[name=description]').attr('content')
     // TODO Have to do something about title
     const findOneAndUpdateAsyncResult = await Level1ScrapDb.createNewLevel1ScrapSchema(
-      'no_title_supported_yet',
-      pageTexts,
-      url
+      previewTitle,
+      pageTexts + '\n' + previewTitle + '\n' + previewBody,
+      url,
+      previewTitle,
+      previewBody
     )
     if (findOneAndUpdateAsyncResult.err) {
       Logger.error('Crawler:Adding new level1SchemaFailed\n' + JSON.stringify(findOneAndUpdateAsyncResult.err))
