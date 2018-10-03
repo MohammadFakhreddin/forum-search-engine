@@ -3,7 +3,7 @@ import { ILevel1Scrap } from '../../models/ILevel1Scrap'
 import * as Types from './../../utils/Types'
 
 const Level1ScrapSchema  = new Mongoose.Schema({
-  title: {type: String, required: true},
+  title: {type: String, default: ''},
   body: {type: String, default: ''},
   url: {type: String, default: ''},
   checked: {type: Boolean, default: false},

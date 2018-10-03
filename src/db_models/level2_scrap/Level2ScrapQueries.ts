@@ -1,4 +1,5 @@
-import { GraphQLString } from 'graphql'
+import { GraphQLInt, GraphQLNonNull, GraphQLString } from 'graphql'
+import { ILevel2Scrap } from '../../models/ILevel2Scrap'
 import { PythonMethods } from '../../utils/PythonMethods'
 import { CommonValidator } from '../../utils/RegexValidator'
 import { StatusCodes } from '../../utils/StatusCodes'
@@ -10,9 +11,13 @@ import { Level2ScrapSearchOutputType } from './Level2ScrapTypeQL'
 export class Level2ScrapQueries {
   public static search = {
     type: Level2ScrapSearchOutputType,
-    args: {text: {type: GraphQLString}},
-    resolve: (root, {text}: {text: string}) => {
-      return new Promise(async (resolve: Types.OnGraphQlPromiseFulfilled, reject: Types.OnPromiseRejected) => {
+    args: {
+      text: {type: new GraphQLNonNull(GraphQLString)},
+      pageNumber: {type: new GraphQLNonNull(GraphQLInt)},
+      pageSize: {type: new GraphQLNonNull(GraphQLInt)}
+    },
+    resolve: (root, {text, pageNumber, pageSize}: {text: string, pageNumber: number, pageSize: number}) => {
+      return new Promise(async (resolve, reject: Types.OnPromiseRejected) => {
         if (CommonValidator.isNullOrEmpty(text)) {
           resolve({
             statusCode: StatusCodes.search_is_empty
@@ -32,15 +37,41 @@ export class Level2ScrapQueries {
           })
           return
         }
-        const searchResult = await Level2ScrapDb.findIScrapsByToken(tokenizeResult.res)
-        if (searchResult.err) {
-          Logger.error(searchResult.err)
-          reject(searchResult.err)
-          return
-        }
-        resolve({
-          statusCode: StatusCodes.ok,
-          res: searchResult.res
+        const pendingExecution = Level2ScrapDb
+          .aggregate([
+            {$match: {'tokenAndOrder.token': {$in: tokenizeResult.res}}},
+            {
+              $project: {
+                url: 1,
+                previewTitle: 1,
+                previewBody: 1,
+                tokenAndOrder: 1,
+                order: {
+                  $size: {
+                    $setIntersection: [
+                      tokenizeResult.res,
+                      '$tokenAndOrder.token'
+                    ]
+                  }
+                }
+              }
+            },
+            {
+              $sort: { order: -1 }
+            }
+          ])
+          .limit(pageSize)
+          .skip((pageNumber - 1) * pageSize)
+        pendingExecution.exec((searchErr, searchRes: ILevel2Scrap[]) => {
+          if (searchErr) {
+            Logger.error(searchErr)
+            reject(searchErr)
+            return
+          }
+          resolve({
+            statusCode: StatusCodes.ok,
+            res: searchRes
+          })
         })
       })
     }

@@ -25,12 +25,11 @@ Level2ScrapSchema.index({
   tokens: 1
 })
 
-Level2ScrapSchema.statics.findIScrapsByToken = function(searchTokens: string[]): Promise<{
+Level2ScrapSchema.statics.findAsync = function(query: any): Promise<{
   err: any,
   res: ILevel2Scrap[]
 }> {
   return new Promise((resolve) => {
-    const query = {'tokenAndOrder.token': searchTokens}
     this.find(query, (err, res) => resolve({err, res}))
   })
 }
@@ -74,7 +73,7 @@ Level2ScrapSchema.statics.findByIdAndUpdateAsync = function(
 export const Level2ScrapDb: ILevel2ScrapSchema = Mongoose.model('level2', Level2ScrapSchema)
 
 export interface ILevel2ScrapSchema extends Mongoose.Model<Mongoose.Document> {
-  findIScrapsByToken?: (searchTokens: string[]) => Promise<{
+  findAsync?: (query: any) => Promise<{
     err: any,
     res: ILevel2Scrap[]
   }>,

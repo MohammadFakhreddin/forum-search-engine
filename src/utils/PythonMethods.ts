@@ -1,5 +1,6 @@
 import * as PythonShell from 'python-shell'
 import { EnvironmentVariables, PythonExecuterAddress } from './../Config'
+import { Logger } from './../utils/Logger'
 
 export class PythonMethods {
   public static tokenize(value: string): Promise<{
@@ -19,7 +20,13 @@ export class PythonMethods {
           resolve({err: pythonErr})
           return
         }
-        resolve({res: JSON.parse(pythonRes)})
+        try {
+          const parsedRes = JSON.parse(pythonRes)
+          resolve({res: parsedRes})
+        } catch (exception) {
+          Logger.handleError(exception)
+          resolve({err: exception})
+        }
       })
     })
   }
