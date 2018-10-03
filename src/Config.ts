@@ -17,7 +17,7 @@ export const EnvironmentVariables  = {
   isWindows: /^win/.test(Os.platform()),
   isMac: /^darwin/.test(Os.platform()),
   devMongoUrl: `mongodb://127.0.0.1:27018/${dbName}?connectTimeoutMS=10000`,
-  prodMongoUrl: `mongodb://127.0.0.1:27018/${dbName}?connectTimeoutMS=10000`,
+  prodMongoUrl: `mongodb://127.0.0.1:27017/${dbName}?connectTimeoutMS=10000`,
   pythonScriptAddress: Path.join(__dirname, '../python'),
   pythonScriptName: 'MTokenizer.py'
 }

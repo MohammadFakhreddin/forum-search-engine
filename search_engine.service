@@ -1,0 +1,12 @@
+[Unit]
+Description=Running persian forum search engine
+After=network.target
+
+[Service]
+Type=simple
+User=root
+ExecStart=/usr/bin/node /root/rambody/server-v2/build/bin/www.js prod
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
