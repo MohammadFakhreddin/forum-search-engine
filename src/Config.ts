@@ -59,5 +59,7 @@ export const PythonExecuterAddress = (
   EnvironmentVariables.isMac === true
   // tslint:disable-next-line:max-line-length
   ? '/usr/local/Cellar/python/3.6.5_1/Frameworks/Python.framework/Versions/3.6/Resources/Python.app/Contents/MacOS/Python'
-  : null
+  : EnvironmentVariables.isWindows === true
+  ? null
+  : '/usr/bin/python3'
 )
