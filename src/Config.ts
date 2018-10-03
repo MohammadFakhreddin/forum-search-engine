@@ -40,7 +40,7 @@ export const SecurityVariables = {
   tokenHeader: 'messenger-app', // TODO change it,
   otpCodeLifeTime: 60 * 10 * 1000,
   otpCodeMinimumResendTime: 60 * 5 * 1000,
-  validOrigin: 'http://localhost:3000'
+  validOrigin: '*'
 }
 
 export const LocalEvents = {

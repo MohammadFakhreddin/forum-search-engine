@@ -1,11 +1,11 @@
 [Unit]
-Description=Running persian forum search engine
+Description=Running persian forum search engine server""
 After=network.target
 
 [Service]
 Type=simple
 User=root
-ExecStart=/usr/bin/node /root/rambody/server-v2/build/bin/www.js prod
+ExecStart=/usr/bin/node /root/search_engine/forum-search-engine/build/bin/www.js prod
 Restart=on-failure
 
 [Install]
