@@ -57,11 +57,11 @@ export class Level2ScrapQueries {
               }
             },
             {
-              $sort: { order: -1 }
+              $sort: { order: 1 }// It was -1 before
             }
           ])
-          .limit(pageSize)
           .skip((pageNumber - 1) * pageSize)
+          .limit(pageSize)
         pendingExecution.exec((searchErr, searchRes: ILevel2Scrap[]) => {
           if (searchErr) {
             Logger.error(searchErr)
