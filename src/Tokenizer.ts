@@ -38,7 +38,12 @@ export class Tokenizer {
         return
       }
       const scraps = findUnCheckedSchemasResult.res
+      let checkedDocumentsCount = 0
       for (const scrap of scraps) {
+        checkedDocumentsCount++
+        if (checkedDocumentsCount > ProcessVariables.tokenizerMaximumDocCount) {
+          break
+        }
         const tokenizeResult = await PythonMethods.tokenize(scrap.body)
         if (tokenizeResult.err) {
           Logger.error('Tokenizer:Error in tokenize method:' + JSON.stringify(tokenizeResult.err))

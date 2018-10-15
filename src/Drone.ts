@@ -89,7 +89,12 @@ export class Drone {
           return
         }
         if (CommonValidator.isEmptyArray(findUnCheckedSchemasResult.res) === false) {
+          let currentScrapCount = 0
           for (const level0Scrap of findUnCheckedSchemasResult.res) {
+            currentScrapCount++
+            if (currentScrapCount > ProcessVariables.droneMaximumDocCount) {
+              break
+            }
             try {// Some links may not be html
               await this.crawlForUrls(level0Scrap.url, level0Scrap.rootUrl)
             } catch (exception) {

@@ -51,7 +51,12 @@ export class Crawler {
         Logger.log('Crawler:No unchecked schema found', __filename)
         return
       }
+      let crawledDocsCount = 0
       for (const level0Scrap of findUnCheckedSchemasResult.res) {
+        crawledDocsCount++
+        if (crawledDocsCount > ProcessVariables.crawlerMaximumDocCount) {
+          break
+        }
         await this.crawlForUrls(level0Scrap.url)
         const updateLevel0ScrapResult = await Level0ScrapDb.findByIdAndUpdateAsync(level0Scrap._id, {
           checkedForLevel1: true

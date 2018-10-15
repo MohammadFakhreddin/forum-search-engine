@@ -30,7 +30,10 @@ export const ProcessVariables = {
   tokenizerInterval: oneMinute * 1, // oneHour * 2,
   droneInterval: oneMinute * 2, // oneHour * 4,
   crawlerInterval: oneMinute * 4, // oneHour * 8,
-  rootUrlsReCrawlTime: oneDay * 2
+  rootUrlsReCrawlTime: oneDay * 2,
+  tokenizerMaximumDocCount: 1000,
+  droneMaximumDocCount: 0,
+  crawlerMaximumDocCount: 1000
 }
 
 export const SecurityVariables = {
