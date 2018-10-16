@@ -53,11 +53,11 @@ export const LocalEvents = {
 }
 
 export const RootUrls = [
-  'https://www.ninisite.com/',
   'http://porsak.ir/',
   'https://www.applyabroad.org/',
   'https://javabyab.com/',
-  'https://www.tebyan.net/'
+  'https://www.tebyan.net/',
+  'https://www.ninisite.com/'
 ]
 
 export const PythonExecuterAddress = (
