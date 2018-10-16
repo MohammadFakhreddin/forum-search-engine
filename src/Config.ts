@@ -3,9 +3,11 @@ import Path from 'path'
 
 const dbName = 'iran_forums'
 
-const oneMinute = 60 * 1000
-const oneHour = 60 * 60 * 1000
-const oneDay = oneHour * 24
+export const Time = {
+  oneMinute : 60 * 1000,
+  oneHour : 60 * 60 * 1000,
+  oneDay : 60 * 60 * 1000 * 24
+}
 
 export const EnvironmentVariables  = {
   port:  '8082',
@@ -27,13 +29,13 @@ export const NetworkVariables = {
 }
 
 export const ProcessVariables = {
-  tokenizerInterval: oneMinute * 1, // oneHour * 2,
-  droneInterval: oneMinute * 2, // oneHour * 4,
-  crawlerInterval: oneMinute * 4, // oneHour * 8,
-  rootUrlsReCrawlTime: oneDay * 2,
-  tokenizerMaximumDocCount: 1000,
-  droneMaximumDocCount: 100,
-  crawlerMaximumDocCount: 1000
+  tokenizerInterval: Time.oneHour,
+  crawlerInterval: Time.oneHour * 4,
+  droneInterval: Time.oneDay,
+  rootUrlsReCrawlTime: Time.oneDay * 2,
+  tokenizerMaximumDocCount: 1000000,
+  droneMaximumDocCount: 10000,
+  crawlerMaximumDocCount: 1000000
 }
 
 export const SecurityVariables = {
