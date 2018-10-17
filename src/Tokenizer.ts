@@ -44,27 +44,31 @@ export class Tokenizer {
         if (checkedDocumentsCount > ProcessVariables.tokenizerMaximumDocCount) {
           break
         }
-        const tokenizeResult = await PythonMethods.tokenize(scrap.body)
-        if (tokenizeResult.err) {
-          Logger.error('Tokenizer:Error in tokenize method:' + JSON.stringify(tokenizeResult.err))
-        } else {
-          if (CommonValidator.isEmptyArray(tokenizeResult.res) === false) {
-            const createLevel2SchemaResult = await Level2ScrapDb.createNewLevel2Schema(
-              scrap.url,
-              tokenizeResult.res,
-              scrap.previewTitle,
-              scrap.previewBody
-            )
-            if (createLevel2SchemaResult.err) {
-              Logger.error(createLevel2SchemaResult.err)
+        try {
+          const tokenizeResult = await PythonMethods.tokenize(scrap.body)
+          if (tokenizeResult.err) {
+            Logger.error('Tokenizer:Error in tokenize method:' + JSON.stringify(tokenizeResult.err))
+          } else {
+            if (CommonValidator.isEmptyArray(tokenizeResult.res) === false) {
+              const createLevel2SchemaResult = await Level2ScrapDb.createNewLevel2Schema(
+                scrap.url,
+                tokenizeResult.res,
+                scrap.previewTitle,
+                scrap.previewBody
+              )
+              if (createLevel2SchemaResult.err) {
+                Logger.error(createLevel2SchemaResult.err)
+              }
+            }
+            const updateLevel1ScrapSchemaResult = await Level1ScrapDb.findByIdAndUpdateAsync(scrap._id, {
+              checked: true
+            })
+            if (updateLevel1ScrapSchemaResult.err) {
+              Logger.error(updateLevel1ScrapSchemaResult.err)
             }
           }
-          const updateLevel1ScrapSchemaResult = await Level1ScrapDb.findByIdAndUpdateAsync(scrap._id, {
-            checked: true
-          })
-          if (updateLevel1ScrapSchemaResult.err) {
-            Logger.error(updateLevel1ScrapSchemaResult.err)
-          }
+        } catch (exception) {
+          Logger.error(exception)
         }
       }
     }

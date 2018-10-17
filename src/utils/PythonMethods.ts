@@ -1,6 +1,7 @@
 import * as PythonShell from 'python-shell'
 import { EnvironmentVariables, PythonExecuterAddress } from './../Config'
 import { Logger } from './../utils/Logger'
+import { CommonValidator } from './RegexValidator'
 
 export class PythonMethods {
   public static tokenize(value: string): Promise<{
@@ -21,7 +22,7 @@ export class PythonMethods {
           return
         }
         try {
-          const parsedRes = JSON.parse(pythonRes)
+          const parsedRes = CommonValidator.isNullOrEmpty(pythonRes) ? JSON.parse(pythonRes) : null
           resolve({res: parsedRes})
         } catch (exception) {
           Logger.handleError(exception)
