@@ -31,11 +31,11 @@ export const NetworkVariables = {
 export const ProcessVariables = {
   tokenizerInterval: Time.oneHour,
   crawlerInterval: Time.oneHour * 4,
-  droneInterval: Time.oneDay,
-  rootUrlsReCrawlTime: Time.oneDay * 2,
+  droneInterval: Time.oneDay / 4,
+  rootUrlsReCrawlTime: Time.oneDay,
   tokenizerMaximumDocCount: 1000000,
-  droneMaximumDocCount: 0,
-  crawlerMaximumDocCount: 0
+  droneMaximumDocCount: 100000,
+  crawlerMaximumDocCount: 100000
 }
 
 export const SecurityVariables = {
@@ -54,10 +54,15 @@ export const LocalEvents = {
 
 export const RootUrls = [
   'http://porsak.ir/',
-  'https://www.applyabroad.org/',
+  'https://www.applyabroad.org/forum/',
   'https://javabyab.com/',
   'https://www.tebyan.net/',
   'https://www.ninisite.com/'
+]
+
+export const ValidHosts = [
+  ...RootUrls,
+  'https://article.tebyan.net/'
 ]
 
 export const PythonExecuterAddress = (

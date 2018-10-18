@@ -1,5 +1,5 @@
 import CrawlHandler from 'crawler'
-import { ProcessVariables, RootUrls } from './Config'
+import { ProcessVariables, RootUrls, ValidHosts } from './Config'
 import { Level0ScrapDb } from './db_models/level0_scrap/Level0ScrapSchema'
 import { RootUrlsDb } from './db_models/root_urls/RootUrls'
 import { Logger } from './utils/Logger'
@@ -151,7 +151,15 @@ export class Drone {
             normalizedUrl = hrefLink
           // Means it's a redirect to another website
           } else if (hrefLink.startsWith('http') || hrefLink.startsWith('https')) {
-            continue
+            for (const validHost of ValidHosts) {
+              if (hrefLink.startsWith(validHost)) {
+                normalizedUrl = hrefLink
+                break
+              }
+            }
+            if (normalizedUrl == null) {
+              continue
+            }
           } else {
             normalizedUrl = rootUrl.concat(hrefLink)
           }

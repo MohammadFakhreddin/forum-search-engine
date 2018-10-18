@@ -57,7 +57,7 @@ export class Level2ScrapQueries {
               }
             },
             {
-              $sort: { order: 1 }// It was -1 before
+              $sort: { order: -1 }
             }
           ])
           .skip((pageNumber - 1) * pageSize)
