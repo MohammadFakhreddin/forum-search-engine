@@ -160,7 +160,7 @@ export class Drone {
           } else {
             normalizedUrl = rootUrl.concat(hrefLink)
           }
-          if (normalizedUrl == null) {
+          if (CommonValidator.isNullOrEmpty(normalizedUrl.replace(' ', '')) == null) {
             continue
           }
           const findUrlResult = await Level0ScrapDb.findOneAsync({
