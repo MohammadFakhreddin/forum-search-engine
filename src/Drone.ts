@@ -157,11 +157,11 @@ export class Drone {
                 break
               }
             }
-            if (normalizedUrl == null) {
-              continue
-            }
           } else {
             normalizedUrl = rootUrl.concat(hrefLink)
+          }
+          if (normalizedUrl == null) {
+            continue
           }
           const findUrlResult = await Level0ScrapDb.findOneAsync({
             url: normalizedUrl
