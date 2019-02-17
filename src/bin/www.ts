@@ -150,7 +150,7 @@ if (Cluster.isWorker) {
     }
     return null
   }
-  let appCluster = runCluster()
+  // let appCluster = runCluster()
   let droneCluster = runCluster()
   let crawlerCluster = runCluster()
   let tokenCluster = runCluster()
