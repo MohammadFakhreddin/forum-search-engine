@@ -141,8 +141,8 @@ if (Cluster.isWorker) {
   const findWorkerRole = (worker: Cluster.Worker): Types.ClusterRole => {
     if (worker.process.pid === tokenCluster.process.pid) {
       return 'tokenizer'
-    // } else if (worker.process.pid === appCluster.process.pid) {
-    //   return 'app'
+    } else if (worker.process.pid === appCluster.process.pid) {
+      return 'app'
     } else if (worker.process.pid === droneCluster.process.pid) {
       return 'drone'
     } else if (worker.process.pid === crawlerCluster.process.pid) {
@@ -150,10 +150,13 @@ if (Cluster.isWorker) {
     }
     return null
   }
-  // let appCluster = runCluster()
-  let droneCluster = runCluster()
-  let crawlerCluster = runCluster()
-  let tokenCluster = runCluster()
+  let appCluster = runCluster()
+  // let droneCluster = runCluster()
+  // let crawlerCluster = runCluster()
+  // let tokenCluster = runCluster()
+  let droneCluster = {process: {pid: -1}}
+  let crawlerCluster = {process: {pid: -2}}
+  let tokenCluster = {process: {pid: -3}}
   Cluster.on('online', (worker) => {
     Logger.log('Worker ' + worker.process.pid + ' is online', __filename)
     const role = findWorkerRole(worker)
@@ -174,7 +177,7 @@ if (Cluster.isWorker) {
       const newWorker = runCluster()
       switch (role) {
         case 'app':
-        // appCluster = newWorker
+        appCluster = newWorker
         break
         case 'tokenizer':
         tokenCluster = newWorker
